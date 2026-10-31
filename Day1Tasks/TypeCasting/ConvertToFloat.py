@@ -1,0 +1,6 @@
+# Convert `"45.6"` to float.
+a ="45.6"
+print("Before Converting ",type(a))
+b=float(a)
+print("After converting type is ",type(b))
+print(b)
