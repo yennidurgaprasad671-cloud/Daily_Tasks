@@ -1,0 +1,15 @@
+"""2. Basic DataFrame Creation from NumPy
+You have:
+data = np.array([[1, 2], [3, 4], [5, 6]])
+Task:
+● Convert it into a Pandas DataFrame
+● Add column names: "X", "Y" """
+
+import pandas as pd
+import numpy as np
+
+data = np.array([[1, 2], [3, 4], [5, 6]])
+label=["X","Y"]
+d1=pd.DataFrame(data,columns=label)
+print(d1)
+
