@@ -1,0 +1,10 @@
+=== Student Score Report ===
+
+Class Average: 66.50
+Rounded Up Average (math.ceil): 67
+
+Students Scoring Above 50:
+- Aarav: 88
+- Rohan: 72
+- Meera: 91
+- Ananya: 64

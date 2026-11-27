@@ -1,0 +1,14 @@
+=== Exam Simulation Report ===
+
+ ID      Name  Mark Grade
+S01 Student_1    97     A
+S02 Student_2    56     D
+S03 Student_3    62     C
+S04 Student_4    67     C
+S05 Student_5    43     F
+S06 Student_6    48     F
+S07 Student_7    58     D
+S08 Student_8    42     F
+
+Mean Score: 59.12
+Standard Deviation: 16.56
