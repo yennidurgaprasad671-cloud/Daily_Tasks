@@ -1,11 +1,43 @@
-# Day 17 Analytics Project quetion 1
+#   ======================  RAILS & GAUGES  ============================
+#
+#   PROJECT NAME : RAILS & GAUGES - A Data Journey Along the Tracks
+#   DATASET      : railway_gauges.csv  (Year, Broad / Metre / Narrow Gauge, Total)
+#   TOOLS USED   : Pandas (data), NumPy (maths), Matplotlib (graphs)
+#   STORY: Railway tracks come in different widths called "gauges".
+#          In this project we load the data, clean it, draw graphs and
+#          finally answer one big question:
+#          "Is the railway moving towards ONE dominant gauge?"
+#   HOW TO RUN : keep this main.py and the CSV file in the same folder, then
+#                python main.py
+#   NOTE       : All graphs are saved automatically inside a folder called
+#                "graphs"
+# =====================================================================
 
-"""Scenario 1: Basic Data Loading & Cleaning."""
 
-import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
+# =====================================================================
+# IMPORTS  (everything the project needs, with the reason for each)
+# =====================================================================
+import os                          # to create the "graphs" folder
+import pandas as pd                # to load the CSV and work with tables (DataFrame)
+import numpy as np                 # for maths: np.diff, np.arange, np.polyfit
+import matplotlib.pyplot as plt    # to draw and save the graphs
 
+
+# =====================================================================
+# SCENARIO 1 : Basic Data Loading & Cleaning
+# =====================================================================
+
+"""You are given a CSV file containing railway gauge data. 
+Tasks: 
+1. Load the dataset into a Pandas DataFrame. 
+2. Display the first 5 rows and column names. 
+3. Check for missing values and replace them with 0. 
+4. Convert all gauge columns (Broad, Metre, Narrow, Total) to numeric types."""
+
+print("\n" + "=" * 60)
+print("SCENARIO 1 : Basic Data Loading & Cleaning")
+print("=" * 60)
+      
 #1. Load the dataset into a Pandas DataFrame.
 df = pd.read_csv("railway_gauges.csv")
 
@@ -20,11 +52,32 @@ df.fillna(0, inplace=True)
 
 #4. Convert all gauge columns (Broad, Metre, Narrow, Total) to numeric types.
 gauge_cols = ["Broad Gauge", "Metre Gauge", "Narrow Gauge", "Total"]
-
 for col in gauge_cols:
-    df[col] =pd.to_numeric(df[col],errors ="coerce").fillna(0)
+    # to_numeric converts text like "3521" into a number.
+    # errors="coerce" turns anything that is not a number into NaN,
+    # and the fillna(0) after it makes that NaN a 0 again.
+    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+print("\nMissing values in each column (after):")
+print(df.isnull().sum())
+print("\nData types after conversion:")
+print(df.dtypes)
     
-""" Scenario 2: Simple Visualization"""
+# =====================================================================
+# SCENARIO 2 : Simple Visualization (Total track growth)
+# =====================================================================
+"""You want a quick understanding of total railway track growth. 
+Tasks: 
+1. Extract Year and Total columns. 
+2. Plot a line graph showing Total tracks over years. 
+3. Add: 
+○ Title 
+○ X and Y labels 
+4. Identify whether the trend is increasing or decreasing."""
+
+print("\n" + "=" * 60)
+print("SCENARIO 2 : Total Track Growth (Line Graph)")
+print("=" * 60)
 
 #1. Extract Year and Total columns.
 yt = df[["Year","Total"]]
@@ -40,14 +93,38 @@ plt.ylabel("Total",fontsize=12)
 plt.xticks(rotation =90)
 plt.grid(True, linestyle="--", alpha=0.6)
 plt.tight_layout()
-plt.savefig("Graphs/scenario2_total_track_trend.png", dpi=300)
+plt.savefig("Graphs/scenario2_total_track_trend.png", dpi=300) 
 plt.close()
 
-#4. Identify whether the trend is increasing or decreasing."""
-"""Trend Direction: The overall trend is slightly increasing with minor mid-period fluctuations. Total track length rose from 6,876 in
-1964-65 to a peak of 7,172 in 2012-13 (an overall net increase of 296 units, or ~4.3%), despite temporary dips around 1998–2001."""
+# 4. Identify whether the trend is increasing or decreasing
+# Method 1: compare the first year with the last year
+first_total = df["Total"].iloc[0]                 # total in the first year
+last_total = df["Total"].iloc[-1]                 # total in the last year
+change = last_total - first_total
+print("\nFirst year total :", first_total)
+print("Last year total  :", last_total)
+print("Overall change   :", change)
 
-#Scenario 3: Filtering + Bar Chart
+if change > 0:
+    print("Trend: INCREASING overall (first year -> last year).")
+else:
+    print("Trend: DECREASING overall (first year -> last year).")
+    
+# =====================================================================
+# SCENARIO 3 : Filtering + Bar Chart (Modern railway expansion)
+# =====================================================================
+"""You are asked to analyze modern railway expansion. 
+Tasks: 
+1. Filter the dataset for years after 2000. 
+2. Select Broad Gauge, Metre Gauge, and Narrow Gauge. 
+3. Plot a grouped bar chart comparing all three gauges. 
+4. Add legend and proper labels. 
+5. Identify which gauge dominates in recent years."""
+
+print("\n" + "=" * 60)
+print("SCENARIO 3 : Years after 2000 (Grouped Bar Chart)")
+print("=" * 60)
+
 
 #1. Filter the dataset for years after 2000.
 
@@ -56,6 +133,9 @@ df_after_2000 = df[df["first_year"] >2000].copy()
 print(df_after_2000)
 
 #2. Select Broad Gauge, Metre Gauge, and Narrow Gauge.
+GAUGES = ["Broad Gauge", "Metre Gauge", "Narrow Gauge"]
+df_after_2000 = df_after_2000[["Year"] + GAUGES]
+print(df_after_2000)
 #3. Plot a grouped bar chart comparing all three gauges.
 ax = df_after_2000.plot(
     x="Year",
@@ -80,14 +160,29 @@ plt.tight_layout()
 plt.savefig("Graphs/scenario3_grouped_bar_after_2000.png", dpi=300)
 plt.close()
 
-#5. Identify which gauge dominates in recent years.
-"""
-Dominant Gauge: Broad Gauge overwhelmingly dominates in recent years, growing steadily from 5,338 in 2001-02 to 6,577 in 2012-13,
-while Metre Gauge and Narrow Gauge shrunk significantly."""
+# 5. Identify which gauge dominates in recent years
+# Add up each gauge over the recent years and pick the biggest one
+recent_totals = df_after_2000[GAUGES].sum()
+print("\nSum of each gauge after 2000:")
+print(recent_totals)
+print("Dominant gauge in recent years:", recent_totals.idxmax())
 
-#Scenario 4: Feature Engineering + Pie Chart
+# =====================================================================
+# SCENARIO 4 : Feature Engineering + Pie Chart (Contribution of each gauge)
+# =====================================================================
+"""You want to analyze the contribution of each gauge type. 
+Tasks: 
+1. Calculate total sum of each gauge across all years. 
+2. Create a new structure (Series/DataFrame) for totals. 
+3. Plot a pie chart showing percentage contribution. 
+4. Add percentage labels (autopct). 
+5. Interpret which gauge contributes the most."""
 
-#1. Calculate total sum of each gauge across all years.
+print("\n" + "=" * 60)
+print("SCENARIO 4 : Contribution of Each Gauge (Pie Chart)")
+print("=" * 60)
+
+#1 & 2. Calculate total sum of each gauge across all years.new structure (Series/DataFrame) for totals.
 gauge_totals = df[["Broad Gauge", "Metre Gauge", "Narrow Gauge"]].sum()
 print(gauge_totals)
 
@@ -110,14 +205,36 @@ plt.tight_layout()
 plt.savefig("Graphs/scenario4_gauge_contribution_pie.png", dpi=300)
 plt.close()
 
-#5. Interpret which gauge contributes the most.
-"""Cumulative Totals:
-	• Broad Gauge: 224,066 (65.0%)
-	• Metre Gauge: 101,798 (29.5%)
-	• Narrow Gauge: 18,953 (5.5%)
-Interpretation: Broad Gauge contributes the most, accounting for nearly two-thirds of cumulative track length across the entire 49-year timeframe."""
+# 5. Interpret which gauge contributes the most
+top_gauge = gauge_totals.idxmax()
+top_percent = gauge_totals.max() / gauge_totals.sum() * 100
+print(f"\nInterpretation: {top_gauge} contributes the most "
+      f"({top_percent:.1f}% of all gauge track).")
 
-#Scenario 5: Advanced Analysis + Multiple Graphs
+
+# =====================================================================
+# SCENARIO 5 : Advanced Analysis + Multiple Graphs
+# =====================================================================
+"""You are asked to perform a complete analysis of railway trends. 
+Tasks: 
+1. Create new columns: 
+○ % Broad Gauge 
+○ % Metre Gauge 
+○ % Narrow Gauge 
+2. Use NumPy (np.diff) to calculate yearly growth of Total tracks. 
+3. Plot: 
+○ Line graph for all gauges 
+○ Stacked bar chart showing composition 
+4. Highlight: 
+○ Years with highest growth 
+○ Decline in any gauge 
+5. Provide a final conclusion: 
+Is the railway system shifting towards a single dominant gauge?"""
+
+print("\n" + "=" * 60)
+print("SCENARIO 5 : Advanced Analysis + Multiple Graphs")
+print("=" * 60)
+
 
 #1. Create new columns: % Broad Gauge % Metre Gauge % Narrow Gauge
 df["% Broad Gauge"] = (df["Broad Gauge"] / df["Total"]) * 100
@@ -170,22 +287,87 @@ plt.tight_layout()
 plt.savefig("Graphs/scenario5_stacked_composition.png", dpi=300)
 plt.close()
 
-print("\nAll graphs successfully saved to the 'graphs/' folder!")
 
-# Growth Highlights & Final Conclusion
+# ------------------------------------------------------------
+# STEP 5: IDENTIFY GAUGES WITH DECLINING TRENDS
+# ------------------------------------------------------------
 
-"""• Years with Highest Total Growth (via np.diff):
-	1. 2003-04: +125 (jumped from 6,906 to 7,031)
-	2. 2007-08: +116 (jumped from 6,909 to 7,025)
-	3. 1965-66: +110 (jumped from 6,876 to 6,986)
-• Decline in Gauges: Both Metre Gauge (dropped by 86.9%, from 2,891 in 1964-65 to 379 in 2012-13) and Narrow Gauge (dropped by 53.4%, from 464 to 216) show steep,
-consistent declines."""
+print("\nGauge Trend Analysis:")
 
-#• Final Conclusion:
-""""Yes, the railway system is decisively shifting towards a single dominant gauge. While total track length stayed relatively
-stable (~6,850–7,170), Broad Gauge's share rose from 51.2% in 1964-65 to 91.7% in 2012-13, demonstrating active gauge conversion (Project Unigauge) rather than
-just new track laying."""
+for column in [
+    "Broad Gauge",
+    "Metre Gauge",
+    "Narrow Gauge"
+]:
 
+    starting_value = df[column].iloc[0]
+
+    ending_value = df[column].iloc[-1]
+
+    change = ending_value - starting_value
+
+    print("\nGauge:", column)
+
+    print("Starting Value:", starting_value)
+
+    print("Ending Value:", ending_value)
+    print("Overall Change:", change)
+
+    if change > 0:
+        print("Trend: Increasing")
+
+    elif change < 0:
+        print("Trend: Decreasing")
+
+    else:
+        print("Trend: No Change")
+
+# ------------------------------------------------------------
+# STEP 6: FINAL CONCLUSION
+# ------------------------------------------------------------
+
+print("\n======================================")
+print("FINAL PROJECT CONCLUSION")
+print("======================================")
+
+# Compare gauge percentages in first and last years
+first_broad = df["% Broad Gauge"].iloc[0]
+
+last_broad = df["% Broad Gauge"].iloc[-1]
+
+first_metre = df["% Metre Gauge"].iloc[0]
+
+last_metre = df["% Metre Gauge"].iloc[-1]
+
+first_narrow = df["% Narrow Gauge"].iloc[0]
+
+last_narrow = df["% Narrow Gauge"].iloc[-1]
+
+print("\nBroad Gauge Percentage Change:",
+      round(last_broad - first_broad, 2), "%")
+print("Metre Gauge Percentage Change:",
+      round(last_metre - first_metre, 2), "%")
+print("Narrow Gauge Percentage Change:",
+      round(last_narrow - first_narrow, 2), "%")
+
+if last_broad > first_broad:
+    print(
+        "\nConclusion: The railway system shows "
+        "a shift towards Broad Gauge dominance."
+    )
+
+else:
+    print(
+        "\nConclusion: Broad Gauge percentage "
+        "has not increased over the analyzed period."
+    )
+
+print("\nAll graphs successfully saved to the 'Graphs/' folder!")
+
+# =====================================================================
+#   END OF PROJECT - RAILS & GAUGES
+#   All 5 scenarios done. Check the "graphs" folder for the saved images.
+# =====================================================================
 
 
 
